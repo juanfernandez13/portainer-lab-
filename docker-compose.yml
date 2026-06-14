@@ -1,0 +1,47 @@
+services:
+  app:
+    build: ./app
+    image: portainer-lab-app:latest
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      APP_NAME: ${APP_NAME:-Portainer Lab}
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - lab-net
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks:
+      - lab-net
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:1.27-alpine
+    ports:
+      - "${HTTP_PORT:-8080}:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - app
+    networks:
+      - lab-net
+    restart: unless-stopped
+
+volumes:
+  redis-data:
+
+networks:
+  lab-net:
+    driver: bridge
