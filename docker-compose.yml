@@ -28,12 +28,10 @@ services:
     restart: unless-stopped
 
   nginx:
-    image: nginx:1.27-alpine
+    build: ./nginx
+    image: portainer-lab-nginx:latest
     ports:
       - "${HTTP_PORT:-8080}:80"
-    configs:
-      - source: nginx_conf
-        target: /etc/nginx/nginx.conf
     depends_on:
       - app
     networks:
@@ -42,10 +40,6 @@ services:
 
 volumes:
   redis-data:
-
-configs:
-  nginx_conf:
-    file: ./nginx/nginx.conf
 
 networks:
   lab-net:
