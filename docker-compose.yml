@@ -31,8 +31,9 @@ services:
     image: nginx:1.27-alpine
     ports:
       - "${HTTP_PORT:-8080}:80"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    configs:
+      - source: nginx_conf
+        target: /etc/nginx/nginx.conf
     depends_on:
       - app
     networks:
@@ -41,6 +42,10 @@ services:
 
 volumes:
   redis-data:
+
+configs:
+  nginx_conf:
+    file: ./nginx/nginx.conf
 
 networks:
   lab-net:
